@@ -59,6 +59,7 @@ namespace Concubines {
                 CampaignGameStarter campaignStarter = (CampaignGameStarter)gameStarter;
 
                 campaignStarter.AddBehavior(new ConcubineCampaignBehavior(campaignStarter));
+                campaignStarter.AddBehavior(new FamilyMenuBehavior(campaignStarter));
             }
         }
     }

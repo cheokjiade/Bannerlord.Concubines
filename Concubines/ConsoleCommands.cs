@@ -1,11 +1,13 @@
 ﻿using Concubines.Extensions;
 using Concubines.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.CampaignSystem.Actions;
 using TaleWorlds.CampaignSystem.CharacterDevelopment;
 using TaleWorlds.CampaignSystem.Extensions;
+using TaleWorlds.CampaignSystem.GameMenus;
 using TaleWorlds.CampaignSystem.Settlements;
 using TaleWorlds.CampaignSystem.Settlements.Buildings;
 using TaleWorlds.Core;
@@ -119,6 +121,37 @@ namespace Concubines {
             }
 
             return "we good.";
+        }
+
+[CommandLineFunctionality.CommandLineArgumentFunction("family", "concubines")]
+        private static string OpenFamilyMenu(List<string> args)
+        {
+            GameMenu.ActivateGameMenu(FamilyMenuBehavior.MenuId);
+            return "opened the family menu.";
+        }
+
+        [CommandLineFunctionality.CommandLineArgumentFunction("come_of_age", "concubines")]
+        private static string ComeOfAge(List<string> args)
+        {
+            if (args.Count < 1)
+            {
+                string listing = string.Join(", ", Hero.MainHero.Children
+                    .Where(c => c != null && c.IsAlive)
+                    .Select(c => c.FirstName.ToString() + " (" + (int)c.Age + ")"));
+                return "Usage: concubines.come_of_age <name> [teen]. Children: " + (listing.Length == 0 ? "none" : listing);
+            }
+
+            bool teen = args.Count > 1 && string.Equals(args[1], "teen", StringComparison.OrdinalIgnoreCase);
+            float threshold = teen ? Campaign.Current.Models.AgeModel.BecomeTeenagerAge : Campaign.Current.Models.AgeModel.HeroComesOfAge;
+            Hero match = Hero.MainHero.Children.FirstOrDefault(c => c != null && c.IsAlive &&
+                (c.FirstName.ToString().IndexOf(args[0], StringComparison.OrdinalIgnoreCase) >= 0 ||
+                 c.Name.ToString().IndexOf(args[0], StringComparison.OrdinalIgnoreCase) >= 0));
+            if (match == null)
+                return "No matching child found.";
+            if (match.Age >= threshold)
+                return match.FirstName + " is already " + (int)match.Age + " years old.";
+            match.SetBirthDay(CampaignTime.Now - CampaignTime.Years(threshold));
+            return match.FirstName + " is now " + (int)threshold + " years old.";
         }
 
         private static void MaxOutTraits(Hero hero)

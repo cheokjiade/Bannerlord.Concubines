@@ -24,5 +24,10 @@
     <string id="EncyclopediaParamourTag" text="Paramour" />
     
     <string id="MessageConcubineTakenByParamour" text="{PARAMOUR} took {CONCUBINE} as a concubine." />
+
+    <string id="FamilyChildGrown" text="{CHILD} is now {AGE} years old." />
+    <string id="FamilyChildrenDressed" text="{COUNT} of your children have been outfitted." />
+    <string id="FamilyChildLegitimized" text="{CHILD} has been legitimized." />
+    <string id="FamilyLegitimizeNoInfluence" text="You lack the influence to legitimize {CHILD}." />
   </strings>
 </base>
