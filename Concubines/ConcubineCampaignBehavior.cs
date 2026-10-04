@@ -201,7 +201,7 @@ namespace Concubines {
         private float GetDailyChanceOfPregnancyForConcubine(Hero concubine, Hero lover) {
             int num = concubine.Children.Count + 1;
             float num2 = (float)(4 + 4 * concubine.Clan.Tier);
-            float num3 = (concubine != Hero.MainHero) ? Math.Min(1f, (2f * num2 - (float)concubine.Clan.Lords.Count) / num2) : 1f;
+            float num3 = (concubine != Hero.MainHero) ? Math.Min(1f, (2f * num2 - (float)concubine.Clan.AliveLords.Count) / num2) : 1f;
             float num4 = (1.2f - (concubine.Age - 18f) * 0.04f) / (float)(num * num) * 0.12f * num3;
             float baseNumber = concubine.Age >= 18f && concubine.Age <= 45f ? num4 : 0f;
             ExplainedNumber explainedNumber = new ExplainedNumber(baseNumber, false, null);

@@ -52,11 +52,11 @@ namespace Concubines {
             {
                 foreach (Building building in town.Buildings)
                 {
-                    building.LevelUp();
-                    building.LevelUp();
-                    building.LevelUp();
+                    for (int i = building.CurrentLevel; i < BuildingType.MaxLevel; i++)
+                        building.LevelUp();
                 }
-                town.CurrentBuilding.BuildingProgress += 2000f;
+                if (town.CurrentBuilding != null)
+                    town.CurrentBuilding.BuildingProgress += 2000f;
 
             }
 
@@ -77,24 +77,16 @@ namespace Concubines {
         [CommandLineFunctionality.CommandLineArgumentFunction("my_children_equip_follow_mother", "concubines")]
         private static string DebugChildrenEquipFollowMother(List<string> args)
         {
+            float heroComesOfAge = Campaign.Current.Models.AgeModel.HeroComesOfAge;
             foreach (Hero child in Hero.MainHero.Children)
             {
-                //&& Hero.MainHero.Children.Contains(child.Mother)
-                if (child.IsAlive && !child.IsChild && child.IsKnownToPlayer && child.Clan == Hero.MainHero.Clan && child.Age >= (float)Campaign.Current.Models.AgeModel.HeroComesOfAge)
+                if (child.IsAlive && !child.IsChild && child.IsKnownToPlayer && child.Clan == Hero.MainHero.Clan && child.Age >= heroComesOfAge)
                 {
                     Bastards.StaticUtils.Utils.LegitimizeBastardFromHero(child);
-                    if (child.Mother.IsAlive)
-                    {
-                        child.BattleEquipment.FillFrom(child.Mother.BattleEquipment);
-                        child.CivilianEquipment.FillFrom(child.Mother.CivilianEquipment);
-                    }
+                    EquipLikeMother(child);
                 }
             }
-            Hero.MainHero.SetTraitLevel(DefaultTraits.Mercy, 2);
-            Hero.MainHero.SetTraitLevel(DefaultTraits.Valor, 2);
-            Hero.MainHero.SetTraitLevel(DefaultTraits.Generosity, 2);
-            Hero.MainHero.SetTraitLevel(DefaultTraits.Calculating, 2);
-            Hero.MainHero.SetTraitLevel(DefaultTraits.Honor, 2);
+            MaxOutTraits(Hero.MainHero);
             return "we good.";
         }
 
@@ -105,59 +97,61 @@ namespace Concubines {
             {
                 if (concubine.IsAlive)
                 {
-                    foreach (CharacterAttribute characterAttribute in Attributes.All)
-                    {
-                        if (concubine.GetAttributeValue(characterAttribute) < 20)
-                        {
-                            concubine.HeroDeveloper.AddAttribute(characterAttribute, 20 - concubine.GetAttributeValue(characterAttribute), false);
-                        }
-                    }
-                    foreach (SkillObject skillObject in Skills.All)
-                    {
-                        concubine.AddSkillXp(skillObject, 10000000);
-                    }
-                    concubine.SetTraitLevel(DefaultTraits.Mercy, 2);
-                    concubine.SetTraitLevel(DefaultTraits.Valor, 2);
-                    concubine.SetTraitLevel(DefaultTraits.Generosity, 2);
-                    concubine.SetTraitLevel(DefaultTraits.Calculating, 2);
-                    concubine.SetTraitLevel(DefaultTraits.Honor, 2);
+                    MaxOutSkillsAttributesTraits(concubine);
                     concubine.SetPersonalRelation(Hero.MainHero, 100);
                     concubine.SetBirthDay(CampaignTime.Now - CampaignTime.Years(18f));
                 }
             }
+            float heroComesOfAge = Campaign.Current.Models.AgeModel.HeroComesOfAge;
             foreach (Hero child in Hero.MainHero.Children)
             {
-                if (child.IsAlive && child.IsChild && child.IsKnownToPlayer && child.Clan == Hero.MainHero.Clan && child.Age < (float)Campaign.Current.Models.AgeModel.HeroComesOfAge)
+                if (child.IsAlive && child.IsChild && child.IsKnownToPlayer && child.Clan == Hero.MainHero.Clan && child.Age < heroComesOfAge)
                 {
                     child.SetBirthDay(CampaignTime.Now - CampaignTime.Years(18f));
-                    foreach (CharacterAttribute characterAttribute in Attributes.All)
-                    {
-                        if (child.GetAttributeValue(characterAttribute) < 20)
-                        {
-                            child.HeroDeveloper.AddAttribute(characterAttribute, 20 - child.GetAttributeValue(characterAttribute), false);
-                        }
-                    }
-                    foreach (SkillObject skillObject in Skills.All)
-                    {
-                        child.AddSkillXp(skillObject, 10000000);
-                    }
+                    MaxOutSkillsAttributesTraits(child);
                     child.SetPersonalRelation(Hero.MainHero, 100);
-                    child.SetTraitLevel(DefaultTraits.Mercy, 2);
-                    child.SetTraitLevel(DefaultTraits.Valor, 2);
-                    child.SetTraitLevel(DefaultTraits.Generosity, 2);
-                    child.SetTraitLevel(DefaultTraits.Calculating, 2);
-                    child.SetTraitLevel(DefaultTraits.Honor, 2);
-                    child.Culture = child.Mother.Culture;
-                    child.UpdatePlayerGender(true);
+                    if (child.Mother != null)
+                        child.Culture = child.Mother.Culture;
                     TextObject name = NameGenerator.Current.GenerateHeroFirstName(child);
                     child.SetName(name, name);
-                    //child.BattleEquipment.GetEquipmentFromSlot(EquipmentIndex.Weapon1).
-                    child.BattleEquipment.FillFrom(child.Mother.BattleEquipment);
-                    child.CivilianEquipment.FillFrom(child.Mother.CivilianEquipment);
+                    EquipLikeMother(child);
                 }
             }
 
             return "we good.";
+        }
+
+        private static void MaxOutTraits(Hero hero)
+        {
+            hero.SetTraitLevel(DefaultTraits.Mercy, 2);
+            hero.SetTraitLevel(DefaultTraits.Valor, 2);
+            hero.SetTraitLevel(DefaultTraits.Generosity, 2);
+            hero.SetTraitLevel(DefaultTraits.Calculating, 2);
+            hero.SetTraitLevel(DefaultTraits.Honor, 2);
+        }
+
+        private static void MaxOutSkillsAttributesTraits(Hero hero)
+        {
+            foreach (CharacterAttribute characterAttribute in Attributes.All)
+            {
+                if (hero.GetAttributeValue(characterAttribute) < 20)
+                {
+                    hero.HeroDeveloper.AddAttribute(characterAttribute, 20 - hero.GetAttributeValue(characterAttribute), false);
+                }
+            }
+            foreach (SkillObject skillObject in Skills.All)
+            {
+                hero.AddSkillXp(skillObject, 10000000);
+            }
+            MaxOutTraits(hero);
+        }
+
+        private static void EquipLikeMother(Hero child)
+        {
+            if (child.Mother == null || !child.Mother.IsAlive)
+                return;
+            child.BattleEquipment.FillFrom(child.Mother.BattleEquipment);
+            child.CivilianEquipment.FillFrom(child.Mother.CivilianEquipment);
         }
     }
 
