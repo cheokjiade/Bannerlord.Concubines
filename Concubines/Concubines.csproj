@@ -31,10 +31,10 @@
 
     <ItemGroup>
       <Reference Include="Bastards">
-        <HintPath>..\..\Bannerlord.Bastards\Bastards\bin\x64\Debug\netstandard2.0\Bastards.dll</HintPath>
+        <HintPath>E:\Games\SteamLibrary\steamapps\common\Mount &amp; Blade II Bannerlord\Modules\Bastards\bin\Win64_Shipping_Client\Bastards.dll</HintPath>
       </Reference>
       <Reference Include="BetterCore">
-        <HintPath>..\..\Bannerlord.BetterCore\BetterCore\bin\x64\Debug\netstandard2.0\BetterCore.dll</HintPath>
+        <HintPath>E:\Games\SteamLibrary\steamapps\common\Mount &amp; Blade II Bannerlord\Modules\BetterCore\bin\Win64_Shipping_Client\BetterCore.dll</HintPath>
       </Reference>
     </ItemGroup>
 
