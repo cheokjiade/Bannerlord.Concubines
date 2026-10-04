@@ -57,4 +57,26 @@
         <Exec Command="IF NOT &quot;$(GameFolder)&quot;==&quot;&quot; XCOPY /Y &quot;$(TargetPath)&quot; &quot;$(GameFolder)\Modules\$(MSBuildProjectName)\bin\Gaming.Desktop.x64_Shipping_Client\&quot;" />
     </Target>
 
+    <PropertyGroup>
+        <PackageDir>$(MSBuildProjectDirectory)\..\dist</PackageDir>
+        <PackageStaging>$(MSBuildProjectDirectory)\obj\package</PackageStaging>
+    </PropertyGroup>
+
+    <Target Name="Package" AfterTargets="Build">
+        <PropertyGroup>
+            <PackageStamp>$([System.DateTime]::Now.ToString('yyyyMMdd-HHmm'))</PackageStamp>
+            <PackageZip>$(PackageDir)\$(ModuleId)-$(PackageStamp).zip</PackageZip>
+        </PropertyGroup>
+        <RemoveDir Directories="$(PackageStaging)" />
+        <MakeDir Directories="$(PackageDir)" />
+        <ItemGroup>
+            <PackageModuleFiles Include="$(MSBuildProjectDirectory)\_Module\**\*" />
+        </ItemGroup>
+        <Copy SourceFiles="@(PackageModuleFiles)" DestinationFiles="@(PackageModuleFiles -> '$(PackageStaging)\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+        <Copy SourceFiles="$(TargetPath)" DestinationFiles="$(PackageStaging)\bin\Win64_Shipping_Client\$(TargetFileName)" />
+        <Copy SourceFiles="$(TargetPath)" DestinationFiles="$(PackageStaging)\bin\Gaming.Desktop.x64_Shipping_Client\$(TargetFileName)" />
+        <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -Command &quot;Compress-Archive -Path '$(PackageStaging)\*' -DestinationPath '$(PackageZip)' -Force&quot;" />
+        <Message Text="Packaged module: $(PackageZip)" Importance="high" />
+    </Target>
+
 </Project>
